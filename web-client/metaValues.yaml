@@ -1,3 +1,3 @@
 # https://github.com/jellyfin/jellyfin-web
-version: NULL
-git_sha: NULL
+version: unstable
+git_sha: d9bb36b9ffb8c693e666d0641dc2413f3c3cb18b
