@@ -3,8 +3,8 @@ name: "📥 Receive Dispatch Events"
 on:
   repository_dispatch:
     types:
-      - web-release
-      - server-release
+      - web-dispatch
+      - server-dispatch
 
 # sample payload:
 # {
@@ -43,7 +43,7 @@ jobs:
           fi
 
       - name: "Bump Version for ${{ env.PACKAGE }} to ${{ env.VERSION }}"
-        run: yq '.version = env(VERSION) | .git_sha = env(GIT_SHA)' -i ${{ env.PACKAGE }}/metaValues.yaml
+        run: yq '.version = env(VERSION) | .git_sha = env(GIT_SHA)' -i ${PACKAGE}/metaValues.yaml
 
       - name: "Commit and Push Changes"
         run: |-
@@ -51,6 +51,6 @@ jobs:
           git config user.name "jellyfin-bot"
           git config user.email "team@jellyfin.org"
 
-          git add package.json package-lock.json
+          git add ${PACKAGE}/metaValues.yaml
           git commit -m "bump ${PACKAGE} version to ${VERSION}"
           git push origin "HEAD:refs/heads/${TARGET_BRANCH}"
