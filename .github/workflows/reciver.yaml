@@ -1,0 +1,56 @@
+name: "📥 Receive Dispatch Events"
+
+on:
+  repository_dispatch:
+    types:
+      - web-release
+      - server-release
+
+# sample payload:
+# {
+#   "branch": "master",
+#   "package": "server",
+#   "version": "...",
+#   "git_sha": "..."
+# }
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.client_payload.branch }}
+
+permissions:
+  contents: write # to push version update and create branches if need be
+
+env:
+  TARGET_BRANCH: ${{ github.event.client_payload.branch }}
+  PACKAGE: ${{ github.event.client_payload.package }}
+  VERSION: ${{ github.event.client_payload.version }}
+  GIT_SHA: ${{ github.event.client_payload.git_sha }}
+
+jobs:
+  changeMe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      # check if branch exists and branch of master if not
+      - name: "Handle Branching"
+        if: ${{ contains(github.event.client_payload.branch, 'release') }}
+        run: |-
+          if git ls-remote --exit-code --heads origin "${TARGET_BRANCH}"; then
+            echo "INFO: Creating new branch ${TARGET_BRANCH}"
+            git checkout -b "${TARGET_BRANCH}"
+          fi
+
+      - name: "Bump Version for ${{ env.PACKAGE }} to ${{ env.VERSION }}"
+        run: yq '.version = env(VERSION) | .git_sha = env(GIT_SHA)' -i ${{ env.PACKAGE }}/metaValues.yaml
+
+      - name: "Commit and Push Changes"
+        run: |-
+          set -exu
+          git config user.name "jellyfin-bot"
+          git config user.email "team@jellyfin.org"
+
+          git add package.json package-lock.json
+          git commit -m "bump ${PACKAGE} version to ${VERSION}"
+          git push origin "HEAD:refs/heads/${TARGET_BRANCH}"
