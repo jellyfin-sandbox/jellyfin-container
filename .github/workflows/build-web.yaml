@@ -39,7 +39,7 @@ jobs:
         if: ${{ contains(github.ref, 'master') }}
         uses: dawidd6/action-download-artifact@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.JF_BOT_TOKEN }}
           repo: ${{ github.repository_owner }}/jellyfin-web-sandbox
           workflow: ci-build.yaml
           name: jellyfin-web_production
