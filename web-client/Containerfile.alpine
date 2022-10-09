@@ -22,10 +22,10 @@ USER 101
 WORKDIR ${APP_DIR}
 
 # Open Container Initiative metadata labels
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL \
-    org.opencontainers.image.vendor="Jellyfin Project" \
+    org.opencontainers.image.url="https://github.com/jellyfin/jellyfin-web" \
     org.opencontainers.image.title="Jellyfin - The Free Software Media System - Web Client" \
-    org.opencontainers.image.description="Official Jellyfin standalone web-client container image" \
-    org.opencontainers.image.url="https://jellyfin.org" \
-    org.opencontainers.image.source="https://github.com/jellyfin/jellyfin-web" \
-    org.opencontainers.image.licenses="GPL-2.0"
+    org.opencontainers.image.vendor="Jellyfin Project" \
+    org.opencontainers.image.licenses="GPL-2.0-or-later" \
+    org.opencontainers.image.description="Official Jellyfin standalone web-client container image"
