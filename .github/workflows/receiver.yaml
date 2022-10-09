@@ -1,5 +1,7 @@
 name: "📥 Receive Dispatch Events"
 
+run-name: "Received dispatch from ${{ github.event.client_payload.package }} for ${{ github.event.client_payload.version }}"
+
 on:
   repository_dispatch:
     types:
@@ -27,7 +29,7 @@ env:
   GIT_SHA: ${{ github.event.client_payload.git_sha }}
 
 jobs:
-  changeMe:
+  handleRecived:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout repository"
