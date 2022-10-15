@@ -34,7 +34,7 @@ jobs:
         run: |-
           set -exu
           APP_VERSION=$(yq '.version' web-client/metaValues.yaml)
-          APP_GIT_SHA=$(yq '.gitSha' web-client/metaValues.yaml)
+          APP_GIT_SHA=$(yq '.git_sha' web-client/metaValues.yaml)
 
           echo "IMG_CREATED=$(date -u +"%Y-%m-%dT%H:%M:%S.%NZ")" >> $GITHUB_ENV
           echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
