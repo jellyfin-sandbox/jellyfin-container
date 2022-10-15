@@ -1,4 +1,4 @@
-name: "🚀 Build and publish standalone Web-Client"
+name: "🚀 Publish standalone Web-Client container"
 
 on:
   push:
@@ -28,12 +28,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
 
-      - name: "Set Variables"
+      - name: "Gather Variables"
         run: |-
           set -exu
+          APP_VERSION=$(yq '.version' web-client/metaValues.yaml)
+          APP_GIT_SHA=$(yq '.gitSha' web-client/metaValues.yaml)
+
           echo "IMG_CREATED=$(date -u +"%Y-%m-%dT%H:%M:%S.%NZ")" >> $GITHUB_ENV
-          echo "APP_VERSION=$(yq '.version' web-client/metaValues.yaml)" >> $GITHUB_ENV
-          echo "APP_GIT_SHA=$(yq '.gitSha' web-client/metaValues.yaml)" >> $GITHUB_ENV
+          echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
+          echo "APP_GIT_SHA=${APP_GIT_SHA}" >> $GITHUB_ENV
+
+          if [[ "${{ github.ref }}" =~ master ]]; then
+            echo "CONTAINER_TAGS=latest ${APP_VERSION}" >> $GITHUB_ENV
+          else
+            echo "CONTAINER_TAGS=unstable ${APP_VERSION}" >> $GITHUB_ENV
+          fi
 
       - name: "Download Incremental Workflow Artifact"
         if: ${{ contains(github.ref, 'master') }}
@@ -62,7 +71,7 @@ jobs:
         with:
           image: jellyfin-web
           oci: true
-          tags: ${{ inputs.containerTags }}
+          tags: ${{ env.CONTAINER_TAGS }}
           labels: |-
             org.opencontainers.image.created=${{ env.IMG_CREATED }}
             org.opencontainers.image.version=${{ env.APP_VERSION }}
