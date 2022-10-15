@@ -33,17 +33,17 @@ jobs:
       - name: "Gather Variables"
         run: |-
           set -exu
-          APP_VERSION=$(yq '.version' web-client/metaValues.yaml)
-          APP_GIT_SHA=$(yq '.git_sha' web-client/metaValues.yaml)
+          APP_VERSION=$(yq --exit-status '.version' web-client/metaValues.yaml)
+          APP_GIT_SHA=$(yq --exit-status '.git_sha' web-client/metaValues.yaml)
 
           echo "IMG_CREATED=$(date -u +"%Y-%m-%dT%H:%M:%S.%NZ")" >> $GITHUB_ENV
           echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
           echo "APP_GIT_SHA=${APP_GIT_SHA}" >> $GITHUB_ENV
 
           if [[ "${{ github.ref }}" =~ master ]]; then
-            echo "CONTAINER_TAGS=latest ${APP_VERSION}" >> $GITHUB_ENV
-          else
             echo "CONTAINER_TAGS=unstable ${APP_VERSION}" >> $GITHUB_ENV
+          else
+            echo "CONTAINER_TAGS=latest ${APP_VERSION}" >> $GITHUB_ENV
           fi
 
       - name: "Download Incremental Workflow Artifact"
@@ -91,4 +91,4 @@ jobs:
           tags: ${{ steps.containerBuild.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
