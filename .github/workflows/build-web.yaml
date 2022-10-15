@@ -64,8 +64,8 @@ jobs:
 
       - name: "Extract Web-Client Tar"
         run: |-
-          mkdir container/jellyfin-web
-          tar -xzf jellyfin-web_portable.tar.gz -C container/jellyfin-web
+          mkdir web-client/jellyfin-web
+          tar -xzf jellyfin-web_portable.tar.gz -C web-client/jellyfin-web
 
       - name: "Build Container Image"
         id: containerBuild
