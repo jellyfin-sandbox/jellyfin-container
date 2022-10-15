@@ -90,5 +90,5 @@ jobs:
           image: ${{ steps.containerBuild.outputs.image }}
           tags: ${{ steps.containerBuild.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
-          username: ${{ secrets.JF_BOT_USER }}
-          password: ${{ secrets.JF_BOT_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
