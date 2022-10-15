@@ -1,4 +1,4 @@
-name: "🚀 Publish standalone Web-Client container"
+name: "🚀 Publish Web Container"
 
 on:
   push:
@@ -80,7 +80,7 @@ jobs:
             org.opencontainers.image.revision=${{ env.APP_GIT_SHA }}
             org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/jellyfin-web-sandbox
           platforms: linux/amd64, linux/arm64/v8, linux/arm/v7
-          context: container
+          context: web-client
           containerfiles: |-
             web-client/Containerfile.alpine
 
