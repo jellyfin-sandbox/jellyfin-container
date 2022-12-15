@@ -7,7 +7,7 @@ image:https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG
 
 image:https://img.shields.io/github/license/jellyfin-sandbox/jellyfin-container.svg[GPL 3.0 license,link="https://github.com/jellyfin-sandbox/jellyfin-container"]
 image:https://img.shields.io/opencollective/all/jellyfin.svg?label=backers[Donate,link="https://opencollective.com/jellyfin"]
-image:https://img.shields.io/matrix/jellyfin-android-dev:matrix.org.svg?logo=matrix[Chat on Matrix,link="https://matrix.to/#/+jellyfin-android-dev:matrix.org"]
+image:https://img.shields.io/matrix/jellyfin-dev:matrix.org.svg?logo=matrix[Chat on Matrix,link="https://matrix.to/#/+jellyfin-dev:matrix.org"]
 image:https://img.shields.io/badge/reddit-r%2Fjellyfin-%23FF5700.svg[Join our Subreddit,link="https://www.reddit.com/r/jellyfin"]
 
 '''
