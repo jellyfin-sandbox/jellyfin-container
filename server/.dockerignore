@@ -1,0 +1,6 @@
+# General purpous
+.ci
+.github
+.vscode
+Containerfile*
+Dockerfike*

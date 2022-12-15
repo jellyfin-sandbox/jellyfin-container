@@ -1,0 +1,90 @@
+on:
+  workflow_call:
+    inputs:
+      codeRepository:
+        required: true
+        type: string
+        description: "The jellyfin code repository to package with the selected rpm descriptor (i.e. jellyfin/jellyfin)."
+      codeRepositoryRef:
+        required: true
+        type: string
+        description: "The jellyfin code repository ref to package with the selected rpm descriptor (i.e. a given git hash or a git tag)."
+      containerSpec:
+        type: string
+        required: true
+        description: "The build context in which to find the metaValues YAML as well as all container context relevant files."
+      imageName:
+        type: string
+        required: true
+        description: "The name that the container image should be available under."
+      imageTags:
+        type: string
+        required: true
+        description: "A space separated list of tags the container image should be available under."
+      imageLabels:
+        type: string
+        required: false
+        description: "A new line seperated list of labels to add to the built container image."
+      containerfile:
+        type: string
+        required: true
+        description: "The relative path to the Containerfile within the repository."
+    secrets:
+      ghc_usr:
+        required: true
+      ghc_tkn:
+        required: true
+      dh_usr:
+        required: false
+      dh_tkn:
+        required: false
+      quay_usr:
+        required: false
+      quay_tkn:
+        required: false
+
+jobs:
+  buildContainer:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "Install qemu dependency"
+        run: |-
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
+      - name: "Checkout Container Repository"
+        uses: actions/checkout@v3
+        with:
+          path: jellyfin-container
+
+      - name: "Checkout Code Repository"
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.codeRepository }}
+          ref: ${{ inputs.codeRepositoryRef }}
+          path: jellyfin-code
+
+      - name: "Copy container Folder"
+        run: cp -r jellyfin-container/${{ inputs.containerSpec }}/* jellyfin-code
+
+      - name: "Build Container Image"
+        id: containerBuild
+        uses: redhat-actions/buildah-build@v2.10
+        with:
+          image: ${{ inputs.imageName }}
+          oci: true
+          tags: ${{ inputs.imageTags }}
+          labels: ${{ inputs.imageLabels }}
+          platforms: linux/amd64, linux/arm64/v8, linux/arm/v7
+          context: jellyfin-code
+          containerfiles: jellyfin-code/${{ inputs.containerfile }}
+
+      - name: "Push Container Image to ghcr.io"
+        uses: redhat-actions/push-to-registry@v2.6
+        with:
+          image: ${{ steps.containerBuild.outputs.image }}
+          tags: ${{ steps.containerBuild.outputs.tags }}
+          registry: ghcr.io/${{ github.repository_owner }}
+          # ONLY works if this repo has write access on the ghcr package
+          username: ${{ secrets.ghc_usr }}
+          password: ${{ secrets.ghc_tkn }}
