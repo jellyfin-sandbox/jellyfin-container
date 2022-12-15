@@ -19,8 +19,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.client_payload.branch }}
 
-permissions:
-  contents: write # to push version update and create branches if need be
+permissions: {}
 
 env:
   TARGET_BRANCH: ${{ github.event.client_payload.branch }}
@@ -32,9 +31,10 @@ jobs:
   handleRecived:
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout repository"
+      - name: "Checkout Repository"
         uses: actions/checkout@v3
         with:
+          # needed since the regular GH token cannot not trigger CI when committing back
           token: ${{ secrets.JF_BOT_TOKEN }}
 
       # check if branch exists and branch of master if not
