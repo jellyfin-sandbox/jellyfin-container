@@ -24,7 +24,7 @@ on:
       imageLabels:
         type: string
         required: false
-        description: "A new line seperated list of labels to add to the built container image."
+        description: "A space seperated list of labels to add to the built container image."
       containerfile:
         type: string
         required: true
@@ -72,12 +72,12 @@ jobs:
           set -ex;
 
           IMAGE_TAGS=""
-          for TAG in "${{ inputs.imageTag }}"; do
+          for TAG in ${{ inputs.imageTag }}; do
             IMAGE_TAGS="--tag ${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
           done
 
           IMAGE_LABELS=""
-          for LABEL in "${{ inputs.imageLabels }}"; do
+          for LABEL in ${{ inputs.imageLabels }}; do
             IMAGE_LABELS="--label ${{ inputs.imageLabels }}:${LABEL} ${IMAGE_LABELS}"
           done
 
