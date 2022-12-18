@@ -79,7 +79,7 @@ jobs:
           done
 
           for LABEL in ${{ inputs.imageLabels }}; do
-            IMAGE_TAGS="--label ${LABEL} ${IMAGE_LABELS}"
+            IMAGE_LABELS="--label ${LABEL} ${IMAGE_LABELS}"
           done
 
           docker buildx build \
