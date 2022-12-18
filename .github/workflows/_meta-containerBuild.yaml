@@ -68,16 +68,19 @@ jobs:
         run: cp -r jellyfin-container/${{ inputs.containerSpec }}/* jellyfin-code
 
       - name: "Build Container Image"
+        env:
+          PARAMETER_TAGS: ${{ inputs.imageTag }}
+          PARAMETER_LABELS: ${{ inputs.imageLabels }}
         run: |-
           set -ex;
 
           IMAGE_TAGS=""
-          for TAG in ${{ inputs.imageTag }}; do
+          for TAG in ${PARAMETER_TAGS}; do
             IMAGE_TAGS="--tag ${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
           done
 
           IMAGE_LABELS=""
-          for LABEL in ${{ inputs.imageLabels }}; do
+          for LABEL in ${PARAMETER_LABELS}; do
             IMAGE_LABELS="--label ${{ inputs.imageLabels }}:${LABEL} ${IMAGE_LABELS}"
           done
 
