@@ -68,20 +68,18 @@ jobs:
         run: cp -r jellyfin-container/${{ inputs.containerSpec }}/* jellyfin-code
 
       - name: "Build Container Image"
-        env:
-          PARAMETER_TAGS: ${{ inputs.imageTag }}
-          PARAMETER_LABELS: ${{ inputs.imageLabels }}
         run: |-
           set -ex;
 
           IMAGE_TAGS=""
-          for TAG in ${PARAMETER_TAGS}; do
+          IMAGE_LABELS=""
+
+          for TAG in ${{ inputs.imageTags }}; do
             IMAGE_TAGS="--tag ${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
           done
 
-          IMAGE_LABELS=""
-          for LABEL in ${PARAMETER_LABELS}; do
-            IMAGE_LABELS="--label ${{ inputs.imageLabels }}:${LABEL} ${IMAGE_LABELS}"
+          for LABEL in ${{ inputs.imageLabels }}; do
+            IMAGE_TAGS="--label ${LABEL} ${IMAGE_LABELS}"
           done
 
           docker buildx build \
