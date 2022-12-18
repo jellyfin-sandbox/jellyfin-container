@@ -72,31 +72,32 @@ jobs:
         run: |-
           set -ex;
 
-          IMAGE_TAGS=""
           IMAGE_LABELS=""
-
-          for TAG in ${{ inputs.imageTags }}; do
-            IMAGE_TAGS="--tag ${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
-          done
 
           for LABEL in ${{ inputs.imageLabels }}; do
             IMAGE_LABELS="--label ${LABEL} ${IMAGE_LABELS}"
           done
 
           docker buildx build \
-            --output type=image \
+            --output type=oci,dest=${{ github.workspace }}/${{ inputs.containerSpec }}.oci.tar \
             --file "jellyfin-code/${{ inputs.containerfile }}" \
             --platform linux/amd64,linux/arm64/v8,linux/arm/v7 \
-            ${IMAGE_TAGS} \
             ${IMAGE_LABELS} \
             jellyfin-code
 
-      - name: "Push Container Image to ghcr.io"
-        uses: redhat-actions/push-to-registry@v2.6
+      - name: "Upload OCI Artifact"
+        uses: actions/upload-artifact@v3
         with:
-          image: ${{ inputs.imageName }}
-          tags: ${{ inputs.imageTags }}
-          registry: ghcr.io/${{ github.repository_owner }}
-          # ONLY works if this repo has write access on the ghcr package
-          username: ${{ secrets.ghc_usr }}
-          password: ${{ secrets.ghc_tkn }}
+          name: ${{ inputs.containerSpec }}-oci
+          path: ${{ inputs.containerSpec }}.oci.tar
+          if-no-files-found: error
+
+#      - name: "Push Container Image to ghcr.io"
+#        uses: redhat-actions/push-to-registry@v2.6
+#        with:
+#          image: ${{ inputs.imageName }}
+#          tags: ${{ inputs.imageTags }}
+#          registry: ghcr.io/${{ github.repository_owner }}
+#          # ONLY works if this repo has write access on the ghcr package
+#          username: ${{ secrets.ghc_usr }}
+#          password: ${{ secrets.ghc_tkn }}
