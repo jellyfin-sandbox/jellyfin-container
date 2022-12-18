@@ -84,6 +84,7 @@ jobs:
           done
 
           docker buildx build \
+            --output type=image \
             --file "jellyfin-code/${{ inputs.containerfile }}" \
             --platform linux/amd64,linux/arm64/v8,linux/arm/v7 \
             ${IMAGE_TAGS} \
