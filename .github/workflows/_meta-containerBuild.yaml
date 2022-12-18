@@ -85,12 +85,18 @@ jobs:
             ${IMAGE_LABELS} \
             jellyfin-code
 
-      - name: "Upload OCI Artifact"
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ inputs.containerSpec }}-oci
-          path: ${{ inputs.containerSpec }}.oci.tar
-          if-no-files-found: error
+      - name: TEST
+        run: |-
+          podman image ls
+          podman image import ${{ github.workspace }}/${{ inputs.containerSpec }}.oci.tar
+          podman image ls
+
+#      - name: "Upload OCI Artifact"
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{ inputs.containerSpec }}-oci
+#          path: ${{ inputs.containerSpec }}.oci.tar
+#          if-no-files-found: error
 
 #      - name: "Push Container Image to ghcr.io"
 #        uses: redhat-actions/push-to-registry@v2.6
