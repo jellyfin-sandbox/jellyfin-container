@@ -63,7 +63,7 @@ jobs:
       containerSpec: server
       imageName: jellyfin-server
       imageTags: ${{ needs.gatherFacts.outputs.imgTags }}
-      imageLabels: |-
+      imageLabels: >-
         org.opencontainers.image.created=${{ needs.gatherFacts.outputs.imgCreated }}
         org.opencontainers.image.version=${{ needs.gatherFacts.outputs.appVersion }}
         org.opencontainers.image.revision=${{ needs.gatherFacts.outputs.appGitSha }}

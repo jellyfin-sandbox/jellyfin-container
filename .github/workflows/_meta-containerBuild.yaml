@@ -68,22 +68,31 @@ jobs:
         run: cp -r jellyfin-container/${{ inputs.containerSpec }}/* jellyfin-code
 
       - name: "Build Container Image"
-        id: containerBuild
-        uses: redhat-actions/buildah-build@v2.10
-        with:
-          image: ${{ inputs.imageName }}
-          oci: true
-          tags: ${{ inputs.imageTags }}
-          labels: ${{ inputs.imageLabels }}
-          platforms: linux/amd64, linux/arm64/v8, linux/arm/v7
-          context: jellyfin-code
-          containerfiles: jellyfin-code/${{ inputs.containerfile }}
+        run: |-
+          set -ex;
+
+          IMAGE_TAGS=""
+          for TAG in "${{ inputs.imageTag }}"; do
+            IMAGE_TAGS="--tag ${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
+          done
+
+          IMAGE_LABELS=""
+          for LABEL in "${{ inputs.imageLabels }}"; do
+            IMAGE_LABELS="--label ${{ inputs.imageLabels }}:${LABEL} ${IMAGE_LABELS}"
+          done
+
+          docker buildx build \
+            --file "jellyfin-code/${{ inputs.containerfile }}" \
+            --platform linux/amd64,linux/arm64/v8,linux/arm/v7 \
+            ${IMAGE_TAGS} \
+            ${IMAGE_LABELS} \
+            jellyfin-code
 
       - name: "Push Container Image to ghcr.io"
         uses: redhat-actions/push-to-registry@v2.6
         with:
-          image: ${{ steps.containerBuild.outputs.image }}
-          tags: ${{ steps.containerBuild.outputs.tags }}
+          image: ${{ inputs.imageName }}
+          tags: ${{ inputs.imageTags }}
           registry: ghcr.io/${{ github.repository_owner }}
           # ONLY works if this repo has write access on the ghcr package
           username: ${{ secrets.ghc_usr }}
