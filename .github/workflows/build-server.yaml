@@ -6,6 +6,8 @@ on:
       - "master"
     paths:
       - "server/**"
+      - ".github/workflows/build-server.yaml"
+      - ".github/workflows/_meta-containerBuild.yaml"
   # TODO: remove after testing
   workflow_dispatch:
 
@@ -57,8 +59,6 @@ jobs:
     uses: ./.github/workflows/_meta-containerBuild.yaml
     needs:
       - gatherFacts
-    permissions:
-      packages: write # to publish to GHCR.io
     with:
       codeRepository: ${{ needs.gatherFacts.outputs.appRepo }}
       codeRepositoryRef: ${{ needs.gatherFacts.outputs.appGitSha }}
@@ -72,8 +72,8 @@ jobs:
         org.opencontainers.image.source=https://github.com/${{ needs.gatherFacts.outputs.appRepo }}
       containerfile: Containerfile.debian
     secrets:
-      ghc_usr: ${{ github.actor }}
-      ghc_tkn: ${{ secrets.GITHUB_TOKEN }}
+      ghc_usr: ${{ secrets.JF_BOT_USER }}
+      ghc_tkn: ${{ secrets.JF_BOT_TOKEN }}
 
   # buildSlimContainer:
 
