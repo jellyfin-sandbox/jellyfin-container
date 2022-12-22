@@ -68,42 +68,32 @@ jobs:
       - name: "Copy container Folder"
         run: cp -r jellyfin-container/${{ inputs.containerSpec }}/* jellyfin-code
 
-      - name: "Build Container Image"
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.ghc_usr }}
+          password: ${{ secrets.ghc_tkn }}
+
+      - name: "Build and Push Container Image"
         run: |-
           set -ex;
 
+          IMAGE_TAGS=""
           IMAGE_LABELS=""
 
+          for TAG in ${{ inputs.imageTags }}; do
+            IMAGE_TAGS="--tag=ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
+          done
+
           for LABEL in ${{ inputs.imageLabels }}; do
-            IMAGE_LABELS="--label ${LABEL} ${IMAGE_LABELS}"
+            IMAGE_LABELS="--label=${LABEL} ${IMAGE_LABELS}"
           done
 
           docker buildx build \
-            --output type=oci,dest=${{ github.workspace }}/${{ inputs.containerSpec }}.oci.tar \
-            --file "jellyfin-code/${{ inputs.containerfile }}" \
-            --platform linux/amd64,linux/arm64/v8,linux/arm/v7 \
+            --output=type=registry \
+            --file="jellyfin-code/${{ inputs.containerfile }}" \
+            --platform=linux/amd64,linux/arm64/v8,linux/arm/v7 \
+            ${IMAGE_TAGS} \
             ${IMAGE_LABELS} \
             jellyfin-code
-
-      - name: TEST
-        run: |-
-          podman image ls
-          podman image import ${{ github.workspace }}/${{ inputs.containerSpec }}.oci.tar
-          podman image ls
-
-#      - name: "Upload OCI Artifact"
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: ${{ inputs.containerSpec }}-oci
-#          path: ${{ inputs.containerSpec }}.oci.tar
-#          if-no-files-found: error
-
-#      - name: "Push Container Image to ghcr.io"
-#        uses: redhat-actions/push-to-registry@v2.6
-#        with:
-#          image: ${{ inputs.imageName }}
-#          tags: ${{ inputs.imageTags }}
-#          registry: ghcr.io/${{ github.repository_owner }}
-#          # ONLY works if this repo has write access on the ghcr package
-#          username: ${{ secrets.ghc_usr }}
-#          password: ${{ secrets.ghc_tkn }}
