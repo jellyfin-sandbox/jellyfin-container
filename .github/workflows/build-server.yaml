@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: ${{ contains(github.ref, 'master') }}
 
 permissions:
+  contents: read
   # contents: write # due to GiNo-KeVa TODO: move to gino-keva job
-  packages: write # to publish to GHCR.io
 
 jobs:
   gatherFacts:
@@ -57,6 +57,8 @@ jobs:
     uses: ./.github/workflows/_meta-containerBuild.yaml
     needs:
       - gatherFacts
+    permissions:
+      packages: write # to publish to GHCR.io
     with:
       codeRepository: ${{ needs.gatherFacts.outputs.appRepo }}
       codeRepositoryRef: ${{ needs.gatherFacts.outputs.appGitSha }}
@@ -71,7 +73,7 @@ jobs:
       containerfile: Containerfile.debian
     secrets:
       ghc_usr: ${{ github.actor }}
-      ghc_tkn: ${{ github.token }}
+      ghc_tkn: ${{ secrets.GITHUB_TOKEN }}
 
   # buildSlimContainer:
 
