@@ -7,7 +7,7 @@
 FROM --platform=${BUILDPLATFORM} mcr.microsoft.com/dotnet/sdk:6.0.403-bullseye-slim AS build
 
 # overwritten automaticaly if properly used with buildx or buildah cross --platform build
-ARG TARGETARCH=amd64
+ARG TARGETARCH=""
 
 COPY . /src/jellyfin-server
 
