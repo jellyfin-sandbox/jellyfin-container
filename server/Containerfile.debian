@@ -7,7 +7,7 @@
 FROM --platform=${BUILDPLATFORM} mcr.microsoft.com/dotnet/sdk:6.0.403-bullseye-slim AS build
 
 # overwritten automaticaly if properly used with buildx or buildah cross --platform build
-ARG TARGETARCH=""
+ARG TARGETPLATFORM=""
 
 COPY . /src/jellyfin-server
 
@@ -15,11 +15,11 @@ WORKDIR /src/jellyfin-server
 
 RUN DOTNET_RUNTIME=""\
     && set -ex \
-    && case "${TARGETARCH}" in \
-        amd64) DOTNET_RUNTIME='linux-x64';; \
-        arm64) DOTNET_RUNTIME='linux-arm64';; \
-        armhf) DOTNET_RUNTIME='linux-arm';; \
-        *) echo "ERR: ${TARGETARCH} unsupported" && exit 1;; \
+    && case "${TARGETPLATFORM}" in \
+        linux/amd64) DOTNET_RUNTIME='linux-x64';; \
+        linux/arm64/v8) DOTNET_RUNTIME='linux-arm64';; \
+        linux/arm/v7) DOTNET_RUNTIME='linux-arm';; \
+        *) echo "ERR: ${TARGETPLATFORM} unsupported" && exit 1;; \
     esac \
     && mkdir -p /app/jellyfin-server \
     && dotnet publish Jellyfin.Server \
