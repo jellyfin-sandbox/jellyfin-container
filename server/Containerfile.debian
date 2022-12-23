@@ -18,7 +18,7 @@ RUN DOTNET_RUNTIME=""\
     && case "${TARGETARCH}" in \
         amd64) DOTNET_RUNTIME='linux-x64';; \
         arm64) DOTNET_RUNTIME='linux-arm64';; \
-        armhf) DOTNET_RUNTIME='linux-arm';; \
+        arm) DOTNET_RUNTIME='linux-arm';; \
         *) echo "ERR: ${TARGETARCH} unsupported" && exit 1;; \
     esac \
     && mkdir -p /app/jellyfin-server \
