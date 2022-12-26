@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "master"
+      - "release-*"
     paths:
       - "server/**"
       - ".github/workflows/build-server.yaml"
@@ -26,8 +27,8 @@ jobs:
       appRepo: ${{ steps.variables.outputs.APP_REPO }}
       appGitSha: ${{ steps.variables.outputs.APP_GIT_SHA }}
       appVersion: ${{ steps.variables.outputs.APP_VERSION }}
-      imgTags: ${{ steps.imageFacts.outputs.IMG_TAGS }}
-      imgCreated: ${{ steps.imageFacts.outputs.IMG_CREATED }}
+      imgTags: ${{ steps.imageFacts.outputs.tags }}
+      imgLabels: ${{ steps.imageFacts.outputs.labels }}
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v3
@@ -40,19 +41,24 @@ jobs:
           echo "APP_GIT_SHA=$(yq --exit-status '.git_sha' server/metaValues.yaml)" >> ${GITHUB_OUTPUT}
           echo "APP_VERSION=$(yq --exit-status '.version' server/metaValues.yaml)" >> ${GITHUB_OUTPUT}
 
-      - name: "Gather Image Facts"
+      - name: "Gather Container Image Facts"
         id: imageFacts
-        run: |-
-          set -exu
-          APP_VERSION=$(yq --exit-status '.version' server/metaValues.yaml)
-
-          if [[ "${{ github.ref }}" =~ master ]]; then
-            echo "IMG_TAGS=unstable ${APP_VERSION}" >> ${GITHUB_OUTPUT}
-          else
-            echo "IMG_TAGS=latest ${APP_VERSION}" >> ${GITHUB_OUTPUT}
-          fi
-
-          echo "IMG_CREATED=$(date -u +"%Y-%m-%dT%H:%M:%S.%NZ")" >> ${GITHUB_OUTPUT}
+        uses: docker/metadata-action@v4
+        with:
+          # docker.io/jellyfin/jellyfin-server
+          # quay.io/jellyfin/jellyfin-server
+          images: |-
+            ghcr.io/${{ github.repository_owner }}/jellyfin-server
+          tags: |-
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/heads/release-') }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/heads/release-') }}
+            type=raw,value=${{ steps.variables.outputs.APP_VERSION }},enable=${{ ! startsWith(github.ref, 'refs/heads/release-') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/heads/release-') }}
+            type=raw,value=unstable,enable=${{ ! startsWith(github.ref, 'refs/heads/release-') }}
+          labels: |-
+            org.opencontainers.image.version=${{ steps.variables.outputs.APP_VERSION }}
+            org.opencontainers.image.revision=${{ steps.variables.outputs.APP_GIT_SHA }}
+            org.opencontainers.image.source=https://github.com/${{ steps.variables.outputs.APP_REPO }}
 
 
   buildContainer:
@@ -65,19 +71,13 @@ jobs:
       codeRepository: ${{ needs.gatherFacts.outputs.appRepo }}
       codeRepositoryRef: ${{ needs.gatherFacts.outputs.appGitSha }}
       containerSpec: server
-      imageName: jellyfin-server
       imageTags: ${{ needs.gatherFacts.outputs.imgTags }}
-      imageLabels: >-
-        org.opencontainers.image.created=${{ needs.gatherFacts.outputs.imgCreated }}
-        org.opencontainers.image.version=${{ needs.gatherFacts.outputs.appVersion }}
-        org.opencontainers.image.revision=${{ needs.gatherFacts.outputs.appGitSha }}
-        org.opencontainers.image.source=https://github.com/${{ needs.gatherFacts.outputs.appRepo }}
+      imageLabels: ${{ needs.gatherFacts.outputs.imgLabels }}
       containerfile: Containerfile.debian
+      publishImage: true # for now
     secrets:
       ghc_usr: ${{ github.actor }}
       ghc_tkn: ${{ secrets.GITHUB_TOKEN }}
-
-  # buildSlimContainer:
 
   # publishGhRelease
 

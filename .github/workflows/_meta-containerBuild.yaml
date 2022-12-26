@@ -13,10 +13,6 @@ on:
         type: string
         required: true
         description: "The build context in which to find the metaValues YAML as well as all container context relevant files."
-      imageName:
-        type: string
-        required: true
-        description: "The name that the container image should be available under."
       imageTags:
         type: string
         required: true
@@ -29,6 +25,11 @@ on:
         type: string
         required: true
         description: "The relative path to the Containerfile within the repository."
+      publishImage:
+        type: boolean
+        required: false
+        default: false
+        description: "Sets if the container image should get pushed after a successful build."
     secrets:
       ghc_usr:
         required: true
@@ -76,24 +77,11 @@ jobs:
           password: ${{ secrets.ghc_tkn }}
 
       - name: "Build and Push Container Image"
-        run: |-
-          set -ex;
-
-          IMAGE_TAGS=""
-          IMAGE_LABELS=""
-
-          for TAG in ${{ inputs.imageTags }}; do
-            IMAGE_TAGS="--tag=ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${TAG} ${IMAGE_TAGS}"
-          done
-
-          for LABEL in ${{ inputs.imageLabels }}; do
-            IMAGE_LABELS="--label=${LABEL} ${IMAGE_LABELS}"
-          done
-
-          docker buildx build \
-            --output=type=registry \
-            --file="jellyfin-code/${{ inputs.containerfile }}" \
-            --platform=linux/amd64,linux/arm64/v8,linux/arm/v7 \
-            ${IMAGE_TAGS} \
-            ${IMAGE_LABELS} \
-            jellyfin-code
+        uses: docker/build-push-action@v3
+        with:
+          tags: ${{ inputs.imageTags }}
+          labels: ${{ inputs.imageLabels }}
+          file: jellyfin-code/${{ inputs.containerfile }}
+          context: jellyfin-code
+          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          push: ${{ inputs.publishImage }}
